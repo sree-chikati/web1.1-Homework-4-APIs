@@ -138,9 +138,9 @@ def historical_results():
     """Displays historical weather forecast for a given day."""
     # TODO: Use 'request.args' to retrieve the city & units from the query
     # parameters.
-    city = ''
-    date = '2020-08-26'
-    units = ''
+    city = request.args.get('city')
+    date = request.args.get('date')
+    units = request.args.get('units')
     date_obj = datetime.strptime(date, '%Y-%m-%d')
     date_in_seconds = date_obj.strftime('%s')
 
@@ -152,13 +152,18 @@ def historical_results():
         # latitude, longitude, units, & date (in seconds).
         # See the documentation here (scroll down to "Historical weather data"):
         # https://openweathermap.org/api/one-call-api
+         "appid": "aa0445f895d55d535d5b11aabaadeb89", 
+         "lat" : latitude,
+         "lon" : longitude,
+         "units" : units,
+         "dt" : date_in_seconds  
         
     }
 
     result_json = requests.get(url, params=params).json()
 
     # Uncomment the line below to see the results of the API call!
-    # pp.pprint(result_json)
+    pp.pprint(result_json)
 
     result_current = result_json['current']
     result_hourly = result_json['hourly']
@@ -166,14 +171,14 @@ def historical_results():
     # TODO: Replace the empty variables below with their appropriate values.
     # You'll need to retrieve these from the 'result_current' object above.
     context = {
-        'city': '',
+        'city': city,
         'date': date_obj,
         'lat': latitude,
         'lon': longitude,
-        'units': '',
-        'units_letter': '', # should be 'C', 'F', or 'K'
-        'description': '',
-        'temp': '',
+        'units': units,
+        'units_letter': get_letter_for_units(units), # should be 'C', 'F', or 'K'
+        'description': result_current['weather'][0]['description'],
+        'temp': result_current['temp'],
         'min_temp': get_min_temp(result_hourly),
         'max_temp': get_max_temp(result_hourly)
     }
