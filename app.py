@@ -23,7 +23,7 @@ app = Flask(__name__)
 
 # Get the API key from the '.env' file
 load_dotenv()
-API_KEY = os.getenv('aa0445f895d55d535d5b11aabaadeb89')
+API_KEY = os.getenv('API_KEY')
 
 
 # Settings for image endpoint
@@ -60,15 +60,14 @@ def get_letter_for_units(units):
 @app.route('/results')
 def results():
     """Displays results for current weather conditions."""
-    # Use 'request.args' to retrieve the city & units from the query parameters.
+
     city = request.args.get('city')
     units = request.args.get('units')
 
     url = 'http://api.openweathermap.org/data/2.5/weather'
     params = {
-        #Query parameters here:
         #Documentation here: https://openweathermap.org/current
-        "appid": "aa0445f895d55d535d5b11aabaadeb89", 
+        "appid": API_KEY, 
         "q": city,
         "units": units
 
@@ -76,7 +75,6 @@ def results():
 
     result_json = requests.get(url, params=params).json()
 
-    # Uncomment the line below to see the results of the API call!
     pp.pprint(result_json)
 
     # For the sunrise & sunset variables you can do so using the `datetime.fromtimestamp()` function.
@@ -96,7 +94,6 @@ def results():
 
 def get_min_temp(results):
     """Returns the minimum temp for the given hourly weather objects."""
-    # Returns the minimum temperature from the hourly weather data.
     temp_list = []
     for i in results:
         temp_list.append(i['temp'])
@@ -107,7 +104,6 @@ def get_min_temp(results):
 
 def get_max_temp(results):
     """Returns the maximum temp for the given hourly weather objects."""
-   # Returns the maximum temperature from the hourly weather data.
     temp_list = []
     for i in results:
         temp_list.append(i['temp'])
@@ -127,7 +123,6 @@ def get_lat_lon(city_name):
 @app.route('/historical_results')
 def historical_results():
     """Displays historical weather forecast for a given day."""
-    #Use 'request.args' to retrieve the city & units from the query parameters.
     city = request.args.get('city')
     date = request.args.get('date')
     units = request.args.get('units')
@@ -138,23 +133,20 @@ def historical_results():
 
     url = 'http://api.openweathermap.org/data/2.5/onecall/timemachine'
     params = {
-        # Query parameters here:
-        # Documentation here (scroll down to "Historical weather data"):https://openweathermap.org/api/one-call-api
-         "appid": "aa0445f895d55d535d5b11aabaadeb89", 
-         "lat" : latitude,
-         "lon" : longitude,
-         "units" : units,
-         "dt" : date_in_seconds  
+        'appid': API_KEY,
+        'dt': date_in_seconds,
+        'units':units,
+        'lat':latitude,
+        'lon':longitude
         
     }
 
     result_json = requests.get(url, params=params).json()
 
-    # Uncomment the line below to see the results of the API call!
     pp.pprint(result_json)
-
     result_current = result_json['current']
     result_hourly = result_json['hourly']
+
 
     context = {
         'city': city,
@@ -162,9 +154,9 @@ def historical_results():
         'lat': latitude,
         'lon': longitude,
         'units': units,
-        'units_letter': get_letter_for_units(units), # should be 'C', 'F', or 'K'
-        'description': result_current['weather'][0]['description'],
-        'temp': result_current['temp'],
+        'units_letter': get_letter_for_units(units),
+        'description': result_json['current']['weather'][0]['description'],
+        'temp': result_json['current']['temp'],
         'min_temp': get_min_temp(result_hourly),
         'max_temp': get_max_temp(result_hourly)
     }
